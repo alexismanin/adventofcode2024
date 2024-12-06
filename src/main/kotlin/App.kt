@@ -41,7 +41,7 @@ fun runDay(dayIdx: Int, partIdx: Int, loader: ClassLoader) : Number {
     val inputlines = loader.getResource(inputName)
         ?.readText()?.lines()
         ?.let { if (it.last().isBlank()) it.subList(0, it.lastIndex) else it }
-        ?: "Input $inputName not found in resources root directory"
+        ?: throw RuntimeException("Input $inputName not found in resources root directory")
 
     return target.invoke(null, inputlines) as? Number ?: throw RuntimeException("Result is not an integer !")
 }
