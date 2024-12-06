@@ -1,0 +1,29 @@
+= Advent of Code 2024
+
+My personal attempt to solve https://adventofcode.com/2024[Advent Of Code 2024] using Kotlin.
+
+To run a specific part of any given day, run:
+
+[source, shell]
+----
+./gradlew run --args="$DAY_NUMBER PART_NUMBER"
+----
+
+Example: to run the second part of the first day, run `./gradlew run --args="1 2"`
+
+== Add a new day
+
+. Add a `DayXX.kt` file in link:src/main/kotlin/[] directory.
+. Set its package to `fr.amanin.aoc2024.dayXX`
+. Implement a `fun partX(inputLines: List<String>) : Any` for each part X of the challenge of the day
+
+=== Testing
+
+There is a test class in link:src/test/kotlin/TestDays.kt[] file.
+This is a parameterized test that accept CSV source arguments:
+
+. day number
+. part number
+. test result
+
+The input text file for the day test must be named `DayXX.txt`, and be set in link:src/test/resources/[] directory.
