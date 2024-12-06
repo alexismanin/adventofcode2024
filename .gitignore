@@ -10,3 +10,6 @@ build
 
 # Ignore input files
 src/main/resources/Day*.txt
+
+# Kotlin compiler cache
+.kotlin
