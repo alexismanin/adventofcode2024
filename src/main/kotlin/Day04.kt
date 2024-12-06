@@ -12,17 +12,41 @@ private val DIRECTIONS = arrayOf(
     Vector2D(-1,  1),
 )
 
+private val DIAGONAL_1 = Vector2D(1, 1)
+private val DIAGONAL_2 = Vector2D(1, -1)
+
 fun part1(input: List<String>): Int {
     val grid = WordGrid(input)
-    return letterOccurrences(SEARCHED.first(), grid)
+    return grid.occurrences(SEARCHED.first())
         .flatMap { startPosition -> searchWord(grid, startPosition, SEARCHED) }
         .count()
 }
 
-private fun letterOccurrences(letter: Char, grid: WordGrid) = sequence {
-    for (i in 0..<grid.nRows) {
-        for (j in 0..<grid.nCols) {
-            if (grid[i, j] == letter) yield(Vector2D(i, j))
+fun part2(input: List<String>): Int {
+    val grid = WordGrid(input)
+    return grid.occurrences('A')
+        .filter { !grid.isOnEdge(it) }
+        .filter { grid.isXMas(it) }
+        .count()
+}
+
+private fun WordGrid.isOnEdge(position: Vector2D): Boolean {
+    return position.row == 0 || position.col == 0 || position.row == nRows-1 || position.col == nCols - 1
+}
+
+private fun WordGrid.isXMas(position: Vector2D) : Boolean {
+    return checkDiagonal(position, DIAGONAL_1) && checkDiagonal(position, DIAGONAL_2)
+}
+
+private fun WordGrid.checkDiagonal(position: Vector2D, diagonal: Vector2D): Boolean {
+    val diagonalLetters = "${get(position + diagonal)}${get(position - diagonal)}"
+    return diagonalLetters == "MS" || diagonalLetters == "SM"
+}
+
+private fun WordGrid.occurrences(letter: Char) = sequence {
+    for (i in 0..<nRows) {
+        for (j in 0..<nCols) {
+            if (get(i, j) == letter) yield(Vector2D(i, j))
         }
     }
 }
