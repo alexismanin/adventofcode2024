@@ -1,5 +1,9 @@
 package fr.amanin.aoc2024.day04
 
+import fr.amanin.aoc2024.*
+
+private typealias WordGrid = CharacterGrid
+
 private val SEARCHED = "XMAS"
 private val DIRECTIONS = arrayOf(
     Vector2D(-1,  0),
@@ -16,22 +20,18 @@ private val DIAGONAL_1 = Vector2D(1, 1)
 private val DIAGONAL_2 = Vector2D(1, -1)
 
 fun part1(input: List<String>): Int {
-    val grid = WordGrid(input)
+    val grid = gridOf(input)
     return grid.occurrences(SEARCHED.first())
         .flatMap { startPosition -> searchWord(grid, startPosition, SEARCHED) }
         .count()
 }
 
 fun part2(input: List<String>): Int {
-    val grid = WordGrid(input)
+    val grid = gridOf(input)
     return grid.occurrences('A')
         .filter { !grid.isOnEdge(it) }
         .filter { grid.isXMas(it) }
         .count()
-}
-
-private fun WordGrid.isOnEdge(position: Vector2D): Boolean {
-    return position.row == 0 || position.col == 0 || position.row == nRows-1 || position.col == nCols - 1
 }
 
 private fun WordGrid.isXMas(position: Vector2D) : Boolean {
@@ -61,8 +61,6 @@ private fun searchWord(grid: WordGrid, start: Vector2D, searched: String) : Sequ
     }
 }
 
-private fun Vector2D.isOutside(grid: WordGrid) = row < 0 || row >= grid.nRows || col < 0 || col >= grid.nCols
-
 private fun searchWord(grid: WordGrid, start: Vector2D, direction: Vector2D, searched: String) : Boolean {
     for (i in 2..<searched.length) {
         val nextPosition = start + (direction * i)
@@ -73,16 +71,3 @@ private fun searchWord(grid: WordGrid, start: Vector2D, direction: Vector2D, sea
 
 private data class Find(val start: Vector2D, val direction: Vector2D)
 
-private data class Vector2D(val row: Int, val col: Int) {
-    operator fun plus(other: Vector2D): Vector2D = Vector2D(row + other.row, col + other.col)
-    operator fun minus(other: Vector2D) = Vector2D(row - other.row, col - other.col)
-    operator fun times(scalar: Int) = Vector2D(row * scalar, col * scalar)
-}
-
-private class WordGrid(private val letters: List<String>) {
-    val nCols = letters[0].length
-    val nRows = letters.size
-
-    operator fun get(row: Int, column: Int): Char = letters[row][column]
-    operator fun get(position: Vector2D): Char = letters[position.row][position.col]
-}
