@@ -43,14 +43,6 @@ private fun WordGrid.checkDiagonal(position: Vector2D, diagonal: Vector2D): Bool
     return diagonalLetters == "MS" || diagonalLetters == "SM"
 }
 
-private fun WordGrid.occurrences(letter: Char) = sequence {
-    for (i in 0..<nRows) {
-        for (j in 0..<nCols) {
-            if (get(i, j) == letter) yield(Vector2D(i, j))
-        }
-    }
-}
-
 private fun searchWord(grid: WordGrid, start: Vector2D, searched: String) : Sequence<Find> = sequence {
     assert(grid[start] == searched.first())
     val secondLetter = searched[1]

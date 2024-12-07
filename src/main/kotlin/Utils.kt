@@ -44,7 +44,7 @@ fun gridOf(lines: List<String>): CharacterGrid {
     return GridView(lines)
 }
 
-fun mutableGridOf(lines: List<String>): CharacterGrid {
+fun mutableGridOf(lines: List<String>): MutableGrid {
     val grid = MutableGrid(lines.size, lines[0].length)
     for (i in 0..<lines.size) grid.setRow(i, lines[i])
     return grid
@@ -52,6 +52,14 @@ fun mutableGridOf(lines: List<String>): CharacterGrid {
 
 fun CharacterGrid.isOnEdge(position: Vector2D): Boolean {
     return position.row == 0 || position.col == 0 || position.row == nRows-1 || position.col == nCols - 1
+}
+
+fun CharacterGrid.occurrences(letter: Char) = sequence {
+    for (i in 0..<nRows) {
+        for (j in 0..<nCols) {
+            if (get(i, j) == letter) yield(Vector2D(i, j))
+        }
+    }
 }
 
 fun Vector2D.isOutside(grid: CharacterGrid) = row < 0 || row >= grid.nRows || col < 0 || col >= grid.nCols
