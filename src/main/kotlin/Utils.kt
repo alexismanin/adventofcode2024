@@ -1,9 +1,15 @@
 package fr.amanin.aoc2024
 
-data class Vector2D(val row: Int, val col: Int) {
+import kotlin.math.max
+import kotlin.math.min
+
+data class Vector2D(val row: Int, val col: Int) : Comparable<Vector2D> {
     operator fun plus(other: Vector2D): Vector2D = Vector2D(row + other.row, col + other.col)
     operator fun minus(other: Vector2D) = Vector2D(row - other.row, col - other.col)
     operator fun times(scalar: Int) = Vector2D(row * scalar, col * scalar)
+    operator fun div(scalar: Int) = Vector2D(row / scalar, col / scalar)
+
+    override fun compareTo(other: Vector2D) = compareBy(Vector2D::row, Vector2D::col).compare(this, other)
 }
 
 interface CharacterGrid {
@@ -26,7 +32,7 @@ private class GridView(private val letters: List<String>) : CharacterGrid {
 
 class MutableGrid(override val nRows: Int, override val nCols: Int, private val buffer : CharArray = CharArray(nRows*nCols)) : CharacterGrid {
 
-    override operator fun get(row: Int, col: Int) = buffer[row * nCols + col]
+    override operator fun get(row: Int, column: Int) = buffer[row * nCols + column]
     override operator fun get(position: Vector2D) = buffer[position.row * nCols + position.col]
     override fun row(index: Int) = String(buffer.copyOfRange(index * nCols, (index + 1) * nCols))
 
@@ -62,4 +68,28 @@ fun CharacterGrid.occurrences(letter: Char) = sequence {
     }
 }
 
-fun Vector2D.isOutside(grid: CharacterGrid) = row < 0 || row >= grid.nRows || col < 0 || col >= grid.nCols
+fun CharacterGrid.sequence() = sequence {
+    for (i in 0..<nRows) {
+        for (j in 0..<nCols) {
+            yield(Vector2D(i, j) to get(i, j))
+        }
+    }
+}
+
+fun Vector2D.isInside(grid: CharacterGrid) = row in 0..<grid.nRows && col in 0..<grid.nCols
+fun Vector2D.isOutside(grid: CharacterGrid) = !isInside(grid)
+
+fun Vector2D.indivisible() = this / pgcd()
+
+fun Vector2D.pgcd() : Int {
+    var pgcd = 1
+    var minTerm = min(row, col)
+    var remainder = max(row, col) % minTerm
+    while (remainder > 0) {
+        pgcd = remainder
+        minTerm = pgcd
+        remainder = minTerm % remainder
+    }
+
+    return pgcd
+}
