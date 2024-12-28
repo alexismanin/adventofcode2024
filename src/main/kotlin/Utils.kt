@@ -14,11 +14,25 @@ data class Vector2D(val row: Int, val col: Int) : Comparable<Vector2D> {
 
 interface CharacterGrid {
     val nCols : Int ; val nRows: Int
+    val nCells : Long get() = nCols.toLong() * nRows
     operator fun get(row: Int, column: Int): Char
     operator fun get(position: Vector2D): Char
     fun row(index: Int): String
     fun rows(): Sequence<String> = (0..<nRows).asSequence().map { row(it) }
     fun print(): String = rows().joinToString(System.lineSeparator())
+}
+
+/**
+ * Low boundaries are inclusive, high boundaries are exclusive
+ */
+data class BBox(val minRow: Int, val minCol: Int, val maxRow: Int, val maxCol: Int) {
+    val spanRow: Int get() = maxRow - minRow
+    val spanCol: Int get() = maxCol - minCol
+    fun contains(position: Vector2D) = position.row in minRow..<maxRow && position.col in minCol..<maxCol
+    operator fun plus(position: Vector2D): BBox {
+        return if (contains(position)) this
+               else BBox(min(minRow, position.row), min(minCol, position.col), max(maxRow, position.row+1), max(maxCol, position.col+1))
+    }
 }
 
 private class GridView(private val letters: List<String>) : CharacterGrid {
@@ -43,6 +57,17 @@ class MutableGrid(override val nRows: Int, override val nCols: Int, private val 
     fun setRow(row: Int, line: String) {
         require(line.length == nCols)
         line.toCharArray().copyInto(buffer, destinationOffset = row * nCols)
+    }
+
+    fun replaceAll(criterion: (Char) -> Boolean, replacement: (Char) -> Char) {
+        for (row in 0 until nRows) {
+            for (col in 0 until nCols) {
+                val old = get(row, col)
+                if (criterion(old)) {
+                    buffer[row * nCols + col] = replacement(old)
+                }
+            }
+        }
     }
 }
 
@@ -74,6 +99,23 @@ fun CharacterGrid.sequence() = sequence {
             yield(Vector2D(i, j) to get(i, j))
         }
     }
+}
+
+fun CharacterGrid.first(match: (Char) -> Boolean) : Vector2D? {
+    for (i in 0..<nRows) {
+        for (j in 0..<nCols) {
+            if (match(get(i, j))) return Vector2D(i, j)
+        }
+    }
+    return null
+}
+
+fun CharacterGrid.mutableCopyOf(area: BBox) : MutableGrid {
+    val buffer = CharArray(area.spanRow * area.spanCol)
+    for (row in area.minRow..<area.maxRow) {
+        row(row).toCharArray(buffer, (row - area.minRow) * area.spanCol, area.minCol, area.maxCol)
+    }
+    return MutableGrid(area.spanRow, area.spanCol, buffer)
 }
 
 fun Vector2D.isInside(grid: CharacterGrid) = row in 0..<grid.nRows && col in 0..<grid.nCols
